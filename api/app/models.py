@@ -22,8 +22,27 @@ class Environment(models.Model):
     last_update = models.DateTimeField(default=timezone.now)
 
 
-    def __str__(self):
-        return "Environment"
+    def update_presence(self, rfid, temperature, humidity, presence):
+        self.last_rfid = rfid
+
+        if presence:
+            if rfid not in self.detected_people:
+                self.detected_people.append(rfid)  
+            self.people_count = len(self.detected_people)  
+        else:
+            if rfid in self.detected_people:
+                self.detected_people.remove(rfid)  
+            self.people_count = len(self.detected_people)
+
+        self.has_presence = bool(self.people_count)
+
+        self.temperature = temperature
+        self.humidity = humidity
+
+        self.last_update = timezone.now()
+
+        self.save()
+        return self
 
 class Log(models.Model):
     event = models.CharField(max_length=255)
